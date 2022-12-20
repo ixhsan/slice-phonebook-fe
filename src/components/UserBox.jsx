@@ -6,27 +6,22 @@ export default class UserBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      users: [
-        { name: "Ikhsan", phone: "0229393921" },
-        { name: "rafi", phone: "32747239" },
-      ],
+      users: [],
     };
   }
 
   componentDidMount() {
-    fetch('http://localhost:3039/api/phonebooks')
-    .then((response) => response.json())
-    .then((data) => {
-      this.setState({
-        users: data.data
-      })
-    })
+    fetch("http://localhost:3039/api/phonebooks")
+      .then((response) => response.json())
+      .then((data) => {
+       this.setState({
+          users: data.data
+        });
+      });
   }
 
-  componentWillUnmount() {
+  componentWillUnmount() {}
 
-  }
- 
   addUser = (name, phone) => {
     this.setState(function (state, props) {
       return {
@@ -34,12 +29,26 @@ export default class UserBox extends Component {
           ...state.users,
           {
             name,
-            phone
+            phone,
           },
         ],
       };
     });
-    
+
+    fetch("http://localhost:3039/api/phonebooks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({name, phone}),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   render() {
@@ -51,13 +60,12 @@ export default class UserBox extends Component {
             <h1>User List</h1>
           </div>
           <div className="card-body">
-            <UserForm add={this.addUser}/>
+            <UserForm add={this.addUser} />
           </div>
-          <UserList data={this.state.users}/>
-          <div className="card-footer">
-          </div>
+          <UserList data={this.state.users} />
+          <div className="card-footer"></div>
         </div>
-        </div>
+      </div>
     );
   }
 }
