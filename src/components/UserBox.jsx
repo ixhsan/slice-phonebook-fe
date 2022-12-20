@@ -1,4 +1,6 @@
 import { Component } from "react";
+import UserList from "./UserList";
+import UserForm from "./UserForm";
 
 export default class UserBox extends Component {
   constructor(props) {
@@ -8,35 +10,36 @@ export default class UserBox extends Component {
         { name: "Ikhsan", phone: "0229393921" },
         { name: "rafi", phone: "32747239" },
       ],
-      name: "",
-      phone: "",
     };
   }
 
-  handleInputChange = (event) => {
-    const { name, value } = event.target;
-    this.setState({
-      [name]: value,
-    });
-  };
+  componentDidMount() {
+    fetch('http://localhost:3039/api/phonebooks')
+    .then((response) => response.json())
+    .then((data) => {
+      this.setState({
+        users: data.data
+      })
+    })
+  }
 
-  handleOnSubmit = (event) => {
-    event.preventDefault();
+  componentWillUnmount() {
+
+  }
+ 
+  addUser = (name, phone) => {
     this.setState(function (state, props) {
       return {
         users: [
           ...state.users,
           {
-            name: this.state.name,
-            phone: this.state.phone,
+            name,
+            phone
           },
         ],
       };
     });
-    this.setState({
-      name: '',
-      phone: ''
-    })
+    
   };
 
   render() {
@@ -48,63 +51,13 @@ export default class UserBox extends Component {
             <h1>User List</h1>
           </div>
           <div className="card-body">
-            <form onSubmit={this.handleOnSubmit}>
-              <div className="row mb-3">
-                <label htmlFor="name" className="col-sm-2 col-form-label">
-                  Name
-                </label>
-                <div className="col-sm-10">
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="name"
-                    name="name"
-                    onChange={this.handleInputChange}
-                    value={this.state.name}
-                  />
-                </div>
-              </div>
-
-              <div className="row mb-3">
-                <label htmlFor="phone" className="col-sm-2 col-form-label">
-                  Phone
-                </label>
-                <div className="col-sm-10">
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="phone"
-                    name="phone"
-                    onChange={this.handleInputChange}
-                    value={this.state.phone}
-                  />
-                </div>
-              </div>
-
-              <button type="submit" className="btn btn-primary">
-                Save
-              </button>
-            </form>
+            <UserForm add={this.addUser}/>
           </div>
-          <table className="table table-striped">
-            <thead>
-              <th>No.</th>
-              <th>Name</th>
-              <th>Phone</th>
-            </thead>
-            <tbody>
-              {this.state.users.map((user, index) => (
-                <tr>
-                  <td>{index + 1}</td>
-                  <td>{user.name}</td>
-                  <td>{user.phone}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="card-footer"></div>
+          <UserList data={this.state.users}/>
+          <div className="card-footer">
+          </div>
         </div>
-      </div>
+        </div>
     );
   }
 }

@@ -1,6 +1,30 @@
 import { Component } from "react";
 
 export default class UserForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      phone: "",
+    };
+  }
+
+  handleInputChange = (event) => {
+    const { name, value } = event.target;
+    this.setState({
+      [name]: value,
+    });
+  };
+
+  handleOnSubmit = (event) => {
+    event.preventDefault();
+    this.props.add(this.state.name, this.state.phone)
+    this.setState({
+      name: '',
+      phone: ''
+    })
+  }; 
+
   render() {
     return (
       <form onSubmit={this.handleOnSubmit}>
