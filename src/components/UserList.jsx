@@ -1,7 +1,6 @@
 import UserItem from "./UserItem";
 
 export default function UserList(props) {
-
   return (
     <table className="table table-striped">
       <thead>
@@ -15,9 +14,12 @@ export default function UserList(props) {
         {props.data.map((user, index) => (
           <UserItem
             key={user.id}
+            itemId={user.id}
             no={index + 1}
             name={user.name}
             phone={user.phone}
+            delete={() => props.delete(user.id)}
+            update={props.update}
           />
         ))}
       </tbody>

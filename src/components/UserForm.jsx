@@ -18,12 +18,12 @@ export default class UserForm extends Component {
 
   handleOnSubmit = (event) => {
     event.preventDefault();
-    this.props.add(this.state.name, this.state.phone)
+    this.props.add(this.state.name, this.state.phone);
     this.setState({
-      name: '',
-      phone: ''
-    })
-  }; 
+      name: "",
+      phone: "",
+    });
+  };
 
   render() {
     return (
@@ -50,7 +50,7 @@ export default class UserForm extends Component {
           </label>
           <div className="col-sm-10">
             <input
-              type="text"
+              type="tel"
               className="form-control"
               id="phone"
               name="phone"
