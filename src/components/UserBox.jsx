@@ -8,7 +8,6 @@ export default class UserBox extends Component {
     super(props);
     this.state = {
       users: [],
-      isSearch: false,
     };
   }
 
@@ -123,14 +122,15 @@ export default class UserBox extends Component {
             <h1>Phonebook</h1>
           </div>
           <div className="card-body">
+            <h2>Add contact</h2>
             <div className="row pb-3">
               <UserForm add={this.addUser} />
             </div>
             <hr />
             <div className="row pb-3">
+            <h2>Search contact</h2>
               <UserSearch
                 search={this.searchContact}
-                searchmode={this.state.isSearch}
               />
             </div>
             <hr />

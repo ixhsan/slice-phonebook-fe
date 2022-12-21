@@ -43,7 +43,7 @@ export default class UserItem extends Component {
   render() {
     return (
       <tr>
-        <td>{this.props.no}</td>
+        <th scope="row">{this.props.no}</th>
         {this.state.isEdit ? (
           <>
             <td>
