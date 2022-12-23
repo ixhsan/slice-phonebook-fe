@@ -31,12 +31,21 @@ export default class UserItem extends Component {
   };
 
   handleEdit = () => this.setState({ isEdit: true });
+
   handleCancel = () => {
     this.setState({ isEdit: false });
     this.setState({
       id: this.props.itemId,
       name: this.props.name,
       phone: this.props.phone,
+    });
+  };
+
+  handleResendContact = () => {
+    this.props.resend({
+      id: this.props.itemId,
+      name: this.props.name,
+      phone: this.props.phone
     });
   };
 
@@ -48,15 +57,15 @@ export default class UserItem extends Component {
           <>
             <td>
               <div className="form-row">
-                  <div className="form-group col-md-6">
-                    <input
-                      type="text"
-                      name="name"
-                      id="name"
-                      className="form-control col"
-                      onChange={this.handleInputChange}
-                      value={this.state.name}
-                    />
+                <div className="form-group col-md-6">
+                  <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    className="form-control col"
+                    onChange={this.handleInputChange}
+                    value={this.state.name}
+                  />
                 </div>
               </div>
             </td>
@@ -77,6 +86,7 @@ export default class UserItem extends Component {
             <td>
               <button
                 type="button"
+                id="save-btn"
                 className="btn btn-info mx-1"
                 onClick={this.handleUpdateContact}
               >
@@ -84,6 +94,7 @@ export default class UserItem extends Component {
               </button>
               <button
                 type="button"
+                id="cancel-btn"
                 className="btn btn-secondary mx-1"
                 onClick={this.handleCancel}
               >
@@ -96,15 +107,28 @@ export default class UserItem extends Component {
             <td>{this.props.name}</td>
             <td>{this.props.phone}</td>
             <td>
+              {this.props.sent ? (
+                <button
+                  type="button"
+                  id="edit-btn"
+                  className="btn btn-success mx-1"
+                  onClick={this.handleEdit}
+                >
+                  Edit
+                </button>
+              ) : (
+                <button
+                  id="resend-button"
+                  type="button"
+                  className="btn btn-warning mx-1"
+                  onClick={this.handleResendContact}
+                >
+                  Resend
+                </button>
+              )}
               <button
                 type="button"
-                className="btn btn-success mx-1"
-                onClick={this.handleEdit}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
+                id="delete-btn"
                 className="btn btn-danger mx-1"
                 onClick={this.props.delete}
               >

@@ -28,6 +28,7 @@ export default class UserForm extends Component {
   render() {
     return (
       <form onSubmit={this.handleOnSubmit}>
+        <div className="row">
         <div className="row mb-3">
           <label htmlFor="name" className="col-sm-2 col-form-label">
             Name
@@ -40,6 +41,7 @@ export default class UserForm extends Component {
               name="name"
               onChange={this.handleInputChange}
               value={this.state.name}
+              required
             />
           </div>
         </div>
@@ -56,13 +58,17 @@ export default class UserForm extends Component {
               name="phone"
               onChange={this.handleInputChange}
               value={this.state.phone}
+              required
             />
           </div>
         </div>
-
+        
+        <div className="col">
         <button type="submit" className="btn btn-primary">
           Save
         </button>
+        </div>
+        </div>
       </form>
     );
   }

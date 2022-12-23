@@ -7,6 +7,7 @@ export default class UserSearch extends Component {
       name: "",
       phone: "",
       isSearch: false,
+      mode: "and",
     };
   }
 
@@ -19,60 +20,137 @@ export default class UserSearch extends Component {
 
   handleOnReset = () => {
     this.setState({
-      isSearch: false
-    })
-    this.props.search()
-  }
+      name: "",
+      phone: "",
+      isSearch: false,
+      mode: "and",
+    });
+    this.props.search({
+      name: "",
+      phone: "",
+    });
+  };
 
-  handleOnSubmit = (event) => {
-    event.preventDefault();
-    this.props.search({ name: this.state.name, phone: this.state.phone });
+  handleModeChanges = (event) => {
+    console.log(event.target.value);
     this.setState({
-      isSearch: true
+      mode: event.target.value,
+    });
+  };
+
+  handleOnSearchSubmit = (event) => {
+    event.preventDefault();
+    if (this.state.name === "" && this.state.phone === "") {
+      return event.preventDefault();
+    }
+    this.props.search({
+      name: this.state.name,
+      phone: this.state.phone,
+      mode: this.state.mode,
+    });
+    this.setState({
+      isSearch: true,
     });
   };
 
   render() {
     return (
-      <form id="search" onSubmit={this.handleOnSubmit}>
-        <div className="row pb-3">
-          <div className="col">
-            <label htmlFor="name-search" className="col-sm-2 col-form-label">
+      <form id="search-contact-form" onSubmit={this.handleOnSearchSubmit}>
+        <div className="row py-1  ">
+          <div className="col-sm-6  ">
+            <label htmlFor="name-search" className="col-sm-4 col-form-label">
               Name
             </label>
-            <input
-              type="text"
-              className="form-control"
-              id="name-search"
-              name="name"
-              onChange={this.handleInputChange}
-              value={this.state.name}
-            />
+            <div className="col-sm-12">
+              <input
+                type="text"
+                className="form-control"
+                id="name-search"
+                name="name"
+                onChange={this.handleInputChange}
+                value={this.state.name}
+              />
+            </div>
           </div>
-          <div className="col">
-            <label htmlFor="phone-search" className="col-sm-2 col-form-label">
+          <div className="col-sm-6  ">
+            <label htmlFor="phone-search" className="col-sm-4 col-form-label">
               Phone
             </label>
-            <input
-              type="tel"
-              className="form-control"
-              id="phone-search"
-              name="phone"
-              onChange={this.handleInputChange}
-              value={this.state.phone}
-            />
+            <div className="col-sm-12">
+              <input
+                type="tel"
+                className="form-control"
+                id="phone-search"
+                name="phone"
+                onChange={this.handleInputChange}
+                value={this.state.phone}
+              />
+            </div>
           </div>
         </div>
-        <button type="submit" form="search" className="btn btn-secondary col-sm-2 mx-1">
-          Search
-        </button>
-        {this.state.isSearch ? (
-          <button type="button" className="btn btn-warning col-sm-2 mx-1" onClick={this.handleOnReset}>
-            Reset
-          </button>
-        ) : (
-          ""
-        )}
+        <div className="row my-1">
+          <div className="col-sm-6 align-self-center">
+            <div className="row">
+              <div className="col-sm-6">
+                <button
+                  type="submit"
+                  form="search-contact-form"
+                  className="btn btn-secondary mx-1 col-sm-8"
+                >
+                  Search
+                </button>
+              </div>
+              {this.state.isSearch && (
+                <div className="col-sm-6">
+                  <button
+                    type="button"
+                    className="btn btn-warning mx-1 col-sm-8"
+                    onClick={this.handleOnReset}
+                  >
+                    Reset
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="col-sm-6">
+            <div className="col-sm-12">search-mode:</div>
+            <fieldset className="row">
+              <div className="col-sm-4">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="mode"
+                    id="strict"
+                    value="and"
+                    checked={this.state.mode === "and"}
+                    onChange={this.handleModeChanges}
+                  />
+                  <label className="form-check-label" htmlFor="strict">
+                    Specific
+                  </label>
+                </div>
+              </div>
+              <div className="col-sm-2">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="mode"
+                    id="loose"
+                    value="or"
+                    checked={this.state.mode === "or"}
+                    onChange={this.handleModeChanges}
+                  />
+                  <label className="form-check-label" htmlFor="loose">
+                    Any
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </div>
       </form>
     );
   }
