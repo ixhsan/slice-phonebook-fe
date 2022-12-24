@@ -12,7 +12,7 @@ export default class UserBox extends Component {
     };
     this.state = {
       users: [],
-      tabId: "add-form",
+      tabId: "search-form",
     };
   }
 
@@ -53,7 +53,6 @@ export default class UserBox extends Component {
   addUser = (name, phone) => {
     const id = Date.now();
     if (this.params.page === this.params.pages) {
-
     }
     this.setState(function (state, props) {
       return {
@@ -214,26 +213,6 @@ export default class UserBox extends Component {
               <li className="nav-item" role="presentation">
                 <a
                   className={
-                    this.state.tabId === "add-form"
-                      ? "nav-link active"
-                      : "nav-link"
-                  }
-                  id="add"
-                  data-mdb-toggle="tab"
-                  data-tab="add-form"
-                  href="#add-form"
-                  role="tab"
-                  aria-controls="add-form"
-                  aria-selected="true"
-                  onClick={this.handleTabClick}
-                  // onChange={this.handleTabState}
-                >
-                  Contact
-                </a>
-              </li>
-              <li className="nav-item" role="presentation">
-                <a
-                  className={
                     this.state.tabId === "search-form"
                       ? "nav-link active"
                       : "nav-link"
@@ -251,9 +230,41 @@ export default class UserBox extends Component {
                   Search
                 </a>
               </li>
+              <li className="nav-item" role="presentation">
+                <a
+                  className={
+                    this.state.tabId === "add-form"
+                      ? "nav-link active"
+                      : "nav-link"
+                  }
+                  id="add"
+                  data-mdb-toggle="tab"
+                  data-tab="add-form"
+                  href="#add-form"
+                  role="tab"
+                  aria-controls="add-form"
+                  aria-selected="true"
+                  onClick={this.handleTabClick}
+                  // onChange={this.handleTabState}
+                >
+                  Add
+                </a>
+              </li>
             </ul>
 
             <div className="tab-content" id="ex1-content">
+              <div
+                className={
+                  this.state.tabId === "search-form"
+                    ? "tab-pane fade show active"
+                    : "tab-pane fade"
+                }
+                id="search-form"
+                role="tabpanel"
+                aria-labelledby="search"
+              >
+                <UserSearch search={this.searchContact} />
+              </div>
               <div
                 className={
                   this.state.tabId === "add-form"
@@ -265,26 +276,9 @@ export default class UserBox extends Component {
                 aria-labelledby="add"
               >
                 <div className="form-group">
-                  <div className="row">
-                    <h2>Add new contact</h2>
-                  </div>
-                  <div className="row pb-3">
+                  
                     <UserForm add={this.addUser} />
-                  </div>
                 </div>
-              </div>
-              <div
-                className={
-                  this.state.tabId === "search-form"
-                    ? "tab-pane fade show active"
-                    : "tab-pane fade"
-                }
-                id="search-form"
-                role="tabpanel"
-                aria-labelledby="search"
-              >
-                <h2>Search contact</h2>
-                <UserSearch search={this.searchContact} />
               </div>
             </div>
 
@@ -312,10 +306,10 @@ export default class UserBox extends Component {
 //     this.state = {
 //       name: '',
 //       phone: '',
-//       key: '',
+//       key: 'save-form',
 //       formValues: [{
-//         Name: 'ikhsan',
-//         Phone: '08093123'
+//         name: 'ikhsan',
+//         phone: '08093123'
 //       }],
 //     };
 //   }
@@ -329,6 +323,7 @@ export default class UserBox extends Component {
 //     event.preventDefault();
 //     console.log(`Name: ${this.state.name}`);
 //     console.log(`Phone: ${this.state.phone}`);
+//     this.resetForm()
 //   }
 
 //   saveValuesToLocalStorage = () => {
@@ -345,20 +340,17 @@ export default class UserBox extends Component {
 //     }
 //   }
 
+//   resetForm = () => {
+//     this.setState({
+//       name: "",
+//       phone: ""
+//     })
+//   }
+
 //   render() {
 //     return (
 //       <>
 //       <form onSubmit={this.handleSubmit}>
-//         <label>
-//           Key:
-//           <input
-//             type="text"
-//             name="key"
-//             value={this.state.key}
-//             onChange={this.handleChange}
-//           />
-//         </label>
-//         <br />
 //         <label>
 //           Name:
 //           <input
@@ -381,10 +373,12 @@ export default class UserBox extends Component {
 //         <br />
 //         <input type="submit" value="Submit" />
 //         <br />
-//         <button onClick={this.saveValuesToLocalStorage}>Save to local storage</button>
-//         <br />
 //         <button onClick={this.loadValuesFromLocalStorage}>Load from local storage</button>
 //       </form>
+//         <br />
+//         <button onClick={this.resetForm}>Clear form</button>
+//         <br />
+//         <button onClick={this.saveValuesToLocalStorage}>Save to local storage</button>
 //       <ul>
 //         {this.state.formValues.map((formValue, index) => (
 //           <li key={index}>{`Name: ${formValue.name}, Phone: ${formValue.phone}`}</li>
