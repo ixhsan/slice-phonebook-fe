@@ -45,8 +45,10 @@ export default class UserItem extends Component {
     this.props.resend({
       id: this.props.itemId,
       name: this.props.name,
-      phone: this.props.phone
+      phone: this.props.phone,
+      sent: this.props.sent
     });
+    
   };
 
   render() {

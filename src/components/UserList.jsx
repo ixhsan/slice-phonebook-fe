@@ -42,7 +42,7 @@ export default function UserList(props) {
               name={user.name}
               phone={user.phone}
               sent={user.sent}
-              delete={() => props.delete(user.id)}
+              delete={() => props.delete({id:user.id, sent:user.sent})}
               update={props.update}
               resend={props.resend}
             />

@@ -12,6 +12,9 @@ export default class UserBox extends Component {
     };
     this.state = {
       users: [],
+      locals: [],
+      stored: [],
+      key: "failed-to-send",
       tabId: "search-form",
     };
   }
@@ -20,12 +23,23 @@ export default class UserBox extends Component {
     this.loadContact();
   }
 
+  componentDidUpdate() {
+    console.log("OP ~ ComponentDidUpdate");
+  }
+
   loadContact = () => {
     fetch(
       `http://localhost:3039/api/phonebooks?${new URLSearchParams(this.params)}`
     )
       .then((response) => response.json())
       .then((data) => {
+        this.params.page = data.data.page;
+        this.params.pages = data.data.pages;
+        console.log(
+          "OP ~ LoadContact page/pages",
+          this.params.page + "/" + this.params.pages
+        );
+
         this.setState((state) => ({
           users: [
             ...(this.params.page === 1 ? [] : state.users),
@@ -33,38 +47,115 @@ export default class UserBox extends Component {
               item.sent = true;
               return item;
             }),
+            ...(this.params.page === this.params.pages
+              ? this.localsLoad()
+              : []
+            ).filter((item) => item.sent === false),
           ],
         }));
-        this.params.page = data.data.page;
-        this.params.pages = data.data.pages;
       });
   };
 
   loadMore = () => {
-    if (this.params.page <= this.params.pages) {
+    if (this.params.page < this.params.pages) {
       this.params = {
         ...this.params,
         page: this.params.page + 1,
       };
       this.loadContact();
     }
+    console.log("🚀 ~ page/pages", this.params.page, "/", this.params.pages);
   };
 
-  addUser = (name, phone) => {
-    const id = Date.now();
-    if (this.params.page === this.params.pages) {
+  localsLoad = () => {
+    console.log("🚀 Running OP-LOAD ~ Checking localStorage");
+    const loadStorage = JSON.parse(localStorage.getItem(this.state.key));
+
+    if (loadStorage !== null) {
+      console.log(
+        "OP ~ LOAD ~ localStorage is not null, returning the array",
+        loadStorage
+      );
+
+      return loadStorage;
+    } else {
+      console.log(
+        "OP ~ LOAD ~ localStorage is null, returning with empty array"
+      );
+      return [];
     }
-    this.setState(function (state, props) {
+  };
+
+  localsSave = (data) => {
+    try {
+      console.log("OP ~ SaveLocals - Property sent object data", data[0].sent);
+      let loadStorage = JSON.parse(localStorage.getItem(this.state.key));
+      let checkDoubles =
+        loadStorage !== null
+          ? loadStorage.filter((item) => item.id === data[0].id)
+          : [1];
+      console.log("OP ~ SaveLocals - checkDoubles value", checkDoubles);
+      console.log("comparing data and localStorage", { ...data, loadStorage });
+
+      if (loadStorage === null) {
+        console.log(
+          "OP ~ SaveLocals - null local storage: setting array...",
+          ...data,
+          Date.now()
+        );
+        localStorage.setItem(this.state.key, JSON.stringify([...data]));
+      } else if (checkDoubles?.length < 1) {
+        console.log(
+          "array is set and no double in localStorage: pushing...",
+          ...data,
+          Date.now()
+        );
+        loadStorage.push(...data);
+        localStorage.setItem(this.state.key, JSON.stringify(loadStorage));
+      } else {
+        console.log("there is double in localStorage");
+      }
+    } catch (error) {
+      console.log('error saving into localstorage', error);
+    }
+  };
+
+  localsDelete = (id) => {
+    try {
+      let loadStorage = JSON.parse(localStorage.getItem(this.state.key));
+      let newData = loadStorage.filter((item) => item.id !== id);
+      localStorage.setItem(this.state.key, JSON.stringify([...newData]));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  localsGet = (id) => {
+    const checkForData = JSON.parse(localStorage.getItem(this.state.key))
+    return checkForData.filter(item => item.id === id).length > 0 ? true : false
+  }
+
+  addUser = (name, phone) => {
+    console.log("OP ~ Save ~ Saving data of", name + "/" + phone);
+    const id = Date.now();
+    const db = this.params.page === this.params.pages ? "users" : "locals";
+    console.log(
+      "OP ~ Save ~ running on page/pages",
+      this.params.page,
+      this.params.pages,
+      "and db of",
+      db
+    );
+    const newContact = {
+      id,
+      name,
+      phone,
+      sent: true,
+    };
+
+    this.setState(function (state) {
       return {
-        users: [
-          ...state.users,
-          {
-            id,
-            name,
-            phone,
-            sent: true,
-          },
-        ],
+        [db]: [...state[db], newContact],
       };
     });
 
@@ -77,25 +168,69 @@ export default class UserBox extends Component {
     })
       .then((response) => response.json())
       .then((data) => {
-        this.setState(function (state) {
-          return state.users.map((item) => {
-            if (item.id === id) {
-              item.id = data.data.id;
-              item.sent = true;
+        this.setState(
+          function (state) {
+            if (this.params.page === this.params.pages) {
+              console.log("OP ~ add ~ kuadran 2 ~ success-con, equal page");
+              return state.users.map((item) => {
+                if (item.id === id) {
+                  item.id = data.data.id;
+                  item.sent = true;
+                }
+                return item;
+              });
+            } else {
+              console.log("OP ~ Save ~ kuadran 1 ~ successs-con, unequal page");
+              return {
+                locals: [
+                  ...state.locals,
+                  ...state.users.map((item) => {
+                    if (item.id === id) {
+                      item.id = data.data.id;
+                      item.sent = true;
+                    }
+                    return item;
+                  }),
+                ],
+              };
             }
-            return item;
-          });
-        });
+          },
+          () =>
+            this.localsSave(this.state.locals.filter((item) => item.id === id))
+        );
       })
       .catch((error) => {
-        this.setState(function (state) {
-          return state.users.map((item) => {
-            if (item.id === id) {
-              item.sent = false;
+        console.log("OP~Save ~ error", error);
+        this.setState(
+          function (state) {
+            if (this.params.page === this.params.pages) {
+              console.log(`OP ~ add ~ kuadran 4 ~ error-con, equal page`);
+              return {
+                locals: [
+                  ...state.locals,
+                  ...state.users.map((item) => {
+                    if (item.id === id) {
+                      item.id = id;
+                      item.sent = false;
+                    }
+
+                    return item;
+                  }),
+                ],
+              };
+            } else {
+              console.log("OP ~ add ~ kuadran 3 ~ error-con, unequal page");
+              return state.locals.map((item) => {
+                if (item.id === id) {
+                  item.sent = false;
+                }
+                return item;
+              });
             }
-            return item;
-          });
-        });
+          },
+          () =>
+            this.localsSave(this.state.locals.filter((item) => item.id === id))
+        );
       });
   };
 
@@ -130,7 +265,17 @@ export default class UserBox extends Component {
       });
   };
 
-  deleteContact = (id) => {
+  deleteContact = ({ id, sent }) => {
+
+    if (this.localsGet(id) && !sent) {
+      this.localsDelete(id)
+      this.setState(function (state) {
+        return {
+          users: state.users.filter((item) => item.id !== id),
+        };
+      });
+    }
+
     fetch(`http://localhost:3039/api/phonebooks/${id}`, {
       method: "DELETE",
       headers: {
@@ -139,19 +284,21 @@ export default class UserBox extends Component {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.success && data.data !== 0)
+        if (data.success && data.data !== 0) {
           this.setState(function (state) {
             return {
               users: state.users.filter((item) => item.id !== id),
             };
           });
+          
+        }
       })
       .catch((error) => {
         console.error("Error:", error);
       });
   };
 
-  resendContact = ({ id, name, phone }) => {
+  resendContact = ({ id, name, phone, sent }) => {
     fetch("http://localhost:3039/api/phonebooks", {
       method: "POST",
       headers: {
@@ -170,6 +317,10 @@ export default class UserBox extends Component {
             return item;
           });
         });
+
+        if (!sent) {
+          this.localsDelete(id);
+        }
       })
       .catch((error) => {
         console.log("error", error);
@@ -189,15 +340,7 @@ export default class UserBox extends Component {
       ...query,
       page: 1,
     };
-    console.log(
-      "🚀 ~ file: UserBox.jsx:191 ~ UserBox ~ this.params",
-      this.params
-    );
     this.loadContact();
-  };
-
-  test = (event) => {
-    event.preventDefault();
   };
 
   render() {
@@ -225,7 +368,6 @@ export default class UserBox extends Component {
                   aria-controls="search-form"
                   aria-selected="false"
                   onClick={this.handleTabClick}
-                  // onChange={this.handleTabState}
                 >
                   Search
                 </a>
@@ -276,13 +418,12 @@ export default class UserBox extends Component {
                 aria-labelledby="add"
               >
                 <div className="form-group">
-                  
-                    <UserForm add={this.addUser} />
+                  <UserForm add={this.addUser} />
                 </div>
               </div>
             </div>
-
             <hr />
+
             <UserList
               data={this.state.users}
               resend={this.resendContact}
@@ -291,100 +432,16 @@ export default class UserBox extends Component {
               loadMore={this.loadMore}
             />
           </div>
-          <div className="card-footer"></div>
+          <div className="card-footer">
+            <button type="button" onClick={this.loadFailedToSend}>
+              test
+            </button>
+            <button type="button" onClick={this.loadFailedToSend2}>
+              test2
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 }
-
-// import React, { Component } from 'react';
-
-// export default class UserBox extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       name: '',
-//       phone: '',
-//       key: 'save-form',
-//       formValues: [{
-//         name: 'ikhsan',
-//         phone: '08093123'
-//       }],
-//     };
-//   }
-
-//   handleChange = (event) => {
-//     const { name, value } = event.target;
-//     this.setState({ [name]: value });
-//   }
-
-//   handleSubmit = (event) => {
-//     event.preventDefault();
-//     console.log(`Name: ${this.state.name}`);
-//     console.log(`Phone: ${this.state.phone}`);
-//     this.resetForm()
-//   }
-
-//   saveValuesToLocalStorage = () => {
-//     const formValues = [...this.state.formValues, { name: this.state.name, phone: this.state.phone }];
-//     localStorage.setItem(this.state.key, JSON.stringify(formValues));
-//   }
-
-//   loadValuesFromLocalStorage = () => {
-//     const storedValues = JSON.parse(localStorage.getItem(this.state.key));
-//     if (storedValues) {
-//       this.setState({ formValues: storedValues });
-//     } else {
-//       console.log('Invalid key');
-//     }
-//   }
-
-//   resetForm = () => {
-//     this.setState({
-//       name: "",
-//       phone: ""
-//     })
-//   }
-
-//   render() {
-//     return (
-//       <>
-//       <form onSubmit={this.handleSubmit}>
-//         <label>
-//           Name:
-//           <input
-//             type="text"
-//             name="name"
-//             value={this.state.name}
-//             onChange={this.handleChange}
-//           />
-//         </label>
-//         <br />
-//         <label>
-//           Phone:
-//           <input
-//             type="text"
-//             name="phone"
-//             value={this.state.phone}
-//             onChange={this.handleChange}
-//           />
-//         </label>
-//         <br />
-//         <input type="submit" value="Submit" />
-//         <br />
-//         <button onClick={this.loadValuesFromLocalStorage}>Load from local storage</button>
-//       </form>
-//         <br />
-//         <button onClick={this.resetForm}>Clear form</button>
-//         <br />
-//         <button onClick={this.saveValuesToLocalStorage}>Save to local storage</button>
-//       <ul>
-//         {this.state.formValues.map((formValue, index) => (
-//           <li key={index}>{`Name: ${formValue.name}, Phone: ${formValue.phone}`}</li>
-//         ))}
-//       </ul>
-//       </>
-//     );
-//   }
-// }
