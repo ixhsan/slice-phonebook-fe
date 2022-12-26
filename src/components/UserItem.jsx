@@ -46,7 +46,6 @@ export default class UserItem extends Component {
       id: this.props.itemId,
       name: this.props.name,
       phone: this.props.phone,
-      sent: this.props.sent
     });
     
   };

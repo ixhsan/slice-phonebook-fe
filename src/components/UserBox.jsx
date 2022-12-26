@@ -12,8 +12,6 @@ export default class UserBox extends Component {
     };
     this.state = {
       users: [],
-      locals: [],
-      stored: [],
       key: "failed-to-send",
       tabId: "search-form",
     };
@@ -47,10 +45,7 @@ export default class UserBox extends Component {
               item.sent = true;
               return item;
             }),
-            ...(this.params.page === this.params.pages
-              ? this.localsLoad()
-              : []
-            ).filter((item) => item.sent === false),
+            
           ],
         }));
       });
@@ -67,95 +62,18 @@ export default class UserBox extends Component {
     console.log("🚀 ~ page/pages", this.params.page, "/", this.params.pages);
   };
 
-  localsLoad = () => {
-    console.log("🚀 Running OP-LOAD ~ Checking localStorage");
-    const loadStorage = JSON.parse(localStorage.getItem(this.state.key));
-
-    if (loadStorage !== null) {
-      console.log(
-        "OP ~ LOAD ~ localStorage is not null, returning the array",
-        loadStorage
-      );
-
-      return loadStorage;
-    } else {
-      console.log(
-        "OP ~ LOAD ~ localStorage is null, returning with empty array"
-      );
-      return [];
-    }
-  };
-
-  localsSave = (data) => {
-    try {
-      console.log("OP ~ SaveLocals - Property sent object data", data[0].sent);
-      let loadStorage = JSON.parse(localStorage.getItem(this.state.key));
-      let checkDoubles =
-        loadStorage !== null
-          ? loadStorage.filter((item) => item.id === data[0].id)
-          : [1];
-      console.log("OP ~ SaveLocals - checkDoubles value", checkDoubles);
-      console.log("comparing data and localStorage", { ...data, loadStorage });
-
-      if (loadStorage === null) {
-        console.log(
-          "OP ~ SaveLocals - null local storage: setting array...",
-          ...data,
-          Date.now()
-        );
-        localStorage.setItem(this.state.key, JSON.stringify([...data]));
-      } else if (checkDoubles?.length < 1) {
-        console.log(
-          "array is set and no double in localStorage: pushing...",
-          ...data,
-          Date.now()
-        );
-        loadStorage.push(...data);
-        localStorage.setItem(this.state.key, JSON.stringify(loadStorage));
-      } else {
-        console.log("there is double in localStorage");
-      }
-    } catch (error) {
-      console.log('error saving into localstorage', error);
-    }
-  };
-
-  localsDelete = (id) => {
-    try {
-      let loadStorage = JSON.parse(localStorage.getItem(this.state.key));
-      let newData = loadStorage.filter((item) => item.id !== id);
-      localStorage.setItem(this.state.key, JSON.stringify([...newData]));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  localsGet = (id) => {
-    const checkForData = JSON.parse(localStorage.getItem(this.state.key))
-    return checkForData.filter(item => item.id === id).length > 0 ? true : false
-  }
-
   addUser = (name, phone) => {
     console.log("OP ~ Save ~ Saving data of", name + "/" + phone);
     const id = Date.now();
-    const db = this.params.page === this.params.pages ? "users" : "locals";
-    console.log(
-      "OP ~ Save ~ running on page/pages",
-      this.params.page,
-      this.params.pages,
-      "and db of",
-      db
-    );
-    const newContact = {
-      id,
-      name,
-      phone,
-      sent: true,
-    };
 
     this.setState(function (state) {
       return {
-        [db]: [...state[db], newContact],
+        users: [...state.users, {
+          id,
+          name,
+          phone,
+          sent: true,
+        }],
       };
     });
 
@@ -170,8 +88,7 @@ export default class UserBox extends Component {
       .then((data) => {
         this.setState(
           function (state) {
-            if (this.params.page === this.params.pages) {
-              console.log("OP ~ add ~ kuadran 2 ~ success-con, equal page");
+              console.log("OP ~ add ~ data successfully added");
               return state.users.map((item) => {
                 if (item.id === id) {
                   item.id = data.data.id;
@@ -179,57 +96,20 @@ export default class UserBox extends Component {
                 }
                 return item;
               });
-            } else {
-              console.log("OP ~ Save ~ kuadran 1 ~ successs-con, unequal page");
-              return {
-                locals: [
-                  ...state.locals,
-                  ...state.users.map((item) => {
-                    if (item.id === id) {
-                      item.id = data.data.id;
-                      item.sent = true;
-                    }
-                    return item;
-                  }),
-                ],
-              };
-            }
           },
-          () =>
-            this.localsSave(this.state.locals.filter((item) => item.id === id))
         );
       })
       .catch((error) => {
         console.log("OP~Save ~ error", error);
         this.setState(
           function (state) {
-            if (this.params.page === this.params.pages) {
-              console.log(`OP ~ add ~ kuadran 4 ~ error-con, equal page`);
-              return {
-                locals: [
-                  ...state.locals,
-                  ...state.users.map((item) => {
-                    if (item.id === id) {
-                      item.id = id;
-                      item.sent = false;
-                    }
-
-                    return item;
-                  }),
-                ],
-              };
-            } else {
-              console.log("OP ~ add ~ kuadran 3 ~ error-con, unequal page");
-              return state.locals.map((item) => {
+              return state.users.map((item) => {
                 if (item.id === id) {
                   item.sent = false;
                 }
                 return item;
               });
             }
-          },
-          () =>
-            this.localsSave(this.state.locals.filter((item) => item.id === id))
         );
       });
   };
@@ -265,16 +145,7 @@ export default class UserBox extends Component {
       });
   };
 
-  deleteContact = ({ id, sent }) => {
-
-    if (this.localsGet(id) && !sent) {
-      this.localsDelete(id)
-      this.setState(function (state) {
-        return {
-          users: state.users.filter((item) => item.id !== id),
-        };
-      });
-    }
+  deleteContact = ({ id }) => {
 
     fetch(`http://localhost:3039/api/phonebooks/${id}`, {
       method: "DELETE",
@@ -317,15 +188,10 @@ export default class UserBox extends Component {
             return item;
           });
         });
-
-        if (!sent) {
-          this.localsDelete(id);
-        }
       })
       .catch((error) => {
         console.log("error", error);
       });
-    setTimeout(() => {}, 2500);
   };
 
   handleTabClick = (event) => {
@@ -387,7 +253,6 @@ export default class UserBox extends Component {
                   aria-controls="add-form"
                   aria-selected="true"
                   onClick={this.handleTabClick}
-                  // onChange={this.handleTabState}
                 >
                   Add
                 </a>
