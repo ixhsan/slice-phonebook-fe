@@ -2,6 +2,7 @@ import { Component } from "react";
 import UserList from "./UserList";
 import UserForm from "./UserForm";
 import UserSearch from "./UserSearch";
+import axios from "axios";
 
 export default class UserBox extends Component {
   constructor(props) {
@@ -27,12 +28,12 @@ export default class UserBox extends Component {
 
   loadContact = async () => {
     try {
-      const fetching = await fetch(
-        `http://localhost:3039/api/phonebooks?${new URLSearchParams(
-          this.params
-        )}`
+      const fetching = await axios.get(
+        `http://localhost:3039/api/phonebooks?`,{
+          params: this.params
+        }
       );
-      const response = await fetching.json();
+      const response = fetching.data
       if (response.success) {
         this.params.page = response.data.page;
         this.params.pages = response.data.pages;
@@ -84,15 +85,9 @@ export default class UserBox extends Component {
         };
       });
 
-      const fetching = await fetch("http://localhost:3039/api/phonebooks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, phone }),
-      });
+      const fetching = await axios.post("http://localhost:3039/api/phonebooks", { name, phone });
 
-      const response = await fetching.json();
+      const response = await fetching.data
 
       if (response.success) {
         this.setState(function (state) {
@@ -120,18 +115,10 @@ export default class UserBox extends Component {
 
   updateContact = async ({ id, name, phone }) => {
     try {
-      const fetching = await fetch(
-        `http://localhost:3039/api/phonebooks/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id, name, phone }),
-        }
-      );
+      const fetching = await axios.put(
+        `http://localhost:3039/api/phonebooks/${id}`,{ id, name, phone })
 
-      const response = await fetching.json();
+      const response = await fetching.data
 
       if (response.success) {
         this.setState(function (state) {
@@ -157,17 +144,11 @@ export default class UserBox extends Component {
 
   deleteContact = async ({ id }) => {
     try {
-      const fetching = await fetch(
+      const fetching = await axios.delete(
         `http://localhost:3039/api/phonebooks/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
       );
 
-      const response = await fetching.json();
+      const response = await fetching.data
 
       if (response.success) {
         if (response.data !== 0) {
@@ -185,15 +166,9 @@ export default class UserBox extends Component {
 
   resendContact = async ({ id, name, phone }) => {
     try {
-      const fetching = await fetch("http://localhost:3039/api/phonebooks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, phone }),
-      });
+      const fetching = await axios.post("http://localhost:3039/api/phonebooks", { name, phone })
 
-      const response = await fetching.json();
+      const response = await fetching.data
 
       if (response.success) {
         this.setState(function (state) {
