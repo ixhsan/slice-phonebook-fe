@@ -25,14 +25,17 @@ export default class UserBox extends Component {
     console.log("OP ~ ComponentDidUpdate");
   }
 
-  loadContact = () => {
-    fetch(
-      `http://localhost:3039/api/phonebooks?${new URLSearchParams(this.params)}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        this.params.page = data.data.page;
-        this.params.pages = data.data.pages;
+  loadContact = async () => {
+    try {
+      const fetching = await fetch(
+        `http://localhost:3039/api/phonebooks?${new URLSearchParams(
+          this.params
+        )}`
+      );
+      const response = await fetching.json();
+      if (response.success) {
+        this.params.page = response.data.page;
+        this.params.pages = response.data.pages;
         console.log(
           "OP ~ LoadContact page/pages",
           this.params.page + "/" + this.params.pages
@@ -41,14 +44,16 @@ export default class UserBox extends Component {
         this.setState((state) => ({
           users: [
             ...(this.params.page === 1 ? [] : state.users),
-            ...data.data.contacts.map((item) => {
+            ...response.data.contacts.map((item) => {
               item.sent = true;
               return item;
             }),
-            
           ],
         }));
-      });
+      }
+    } catch (error) {
+      console.log("error ketika mau load data", error);
+    }
   };
 
   loadMore = () => {
@@ -62,76 +67,81 @@ export default class UserBox extends Component {
     console.log("🚀 ~ page/pages", this.params.page, "/", this.params.pages);
   };
 
-  addUser = (name, phone) => {
-    console.log("OP ~ Save ~ Saving data of", name + "/" + phone);
+  addUser = async (name, phone) => {
     const id = Date.now();
-
-    this.setState(function (state) {
-      return {
-        users: [...state.users, {
-          id,
-          name,
-          phone,
-          sent: true,
-        }],
-      };
-    });
-
-    fetch("http://localhost:3039/api/phonebooks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, phone }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        this.setState(
-          function (state) {
-              console.log("OP ~ add ~ data successfully added");
-              return state.users.map((item) => {
-                if (item.id === id) {
-                  item.id = data.data.id;
-                  item.sent = true;
-                }
-                return item;
-              });
-          },
-        );
-      })
-      .catch((error) => {
-        console.log("OP~Save ~ error", error);
-        this.setState(
-          function (state) {
-              return state.users.map((item) => {
-                if (item.id === id) {
-                  item.sent = false;
-                }
-                return item;
-              });
-            }
-        );
+    try {
+      await this.setState(function (state) {
+        return {
+          users: [
+            ...state.users,
+            {
+              id,
+              name,
+              phone,
+              sent: true,
+            },
+          ],
+        };
       });
+
+      const fetching = await fetch("http://localhost:3039/api/phonebooks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, phone }),
+      });
+
+      const response = await fetching.json();
+
+      if (response.success) {
+        this.setState(function (state) {
+          console.log("OP ~ add ~ data successfully added");
+          return state.users.map((item) => {
+            if (item.id === id) {
+              item.id = response.data.id;
+              item.sent = true;
+            }
+            return item;
+          });
+        });
+      }
+    } catch (error) {
+      this.setState(function (state) {
+        return state.users.map((item) => {
+          if (item.id === id) {
+            item.sent = false;
+          }
+          return item;
+        });
+      });
+    }
   };
 
-  updateContact = ({ id, name, phone }) => {
-    fetch(`http://localhost:3039/api/phonebooks/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id, name, phone }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+  updateContact = async ({ id, name, phone }) => {
+    try {
+      const fetching = await fetch(
+        `http://localhost:3039/api/phonebooks/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id, name, phone }),
+        }
+      );
+
+      const response = await fetching.json();
+
+      if (response.success) {
         this.setState(function (state) {
           return {
             users: state.users.map((item) => {
-              if (item.id === data.data.id) {
+              if (item.id === response.data.id) {
                 return {
-                  id: data.data.id,
-                  name: data.data.name,
-                  phone: data.data.phone,
+                  id: response.data.id,
+                  name: response.data.name,
+                  phone: response.data.phone,
                   sent: true,
                 };
               }
@@ -139,59 +149,66 @@ export default class UserBox extends Component {
             }),
           };
         });
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      }
+    } catch (error) {
+      console.log("error saat updating data", error);
+    }
   };
 
-  deleteContact = ({ id }) => {
+  deleteContact = async ({ id }) => {
+    try {
+      const fetching = await fetch(
+        `http://localhost:3039/api/phonebooks/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    fetch(`http://localhost:3039/api/phonebooks/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success && data.data !== 0) {
+      const response = await fetching.json();
+
+      if (response.success) {
+        if (response.data !== 0) {
           this.setState(function (state) {
             return {
               users: state.users.filter((item) => item.id !== id),
             };
           });
-          
         }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      }
+    } catch (error) {
+      console.log("error saat deleting data", error);
+    }
   };
 
-  resendContact = ({ id, name, phone, sent }) => {
-    fetch("http://localhost:3039/api/phonebooks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, phone }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+  resendContact = async ({ id, name, phone }) => {
+    try {
+      const fetching = await fetch("http://localhost:3039/api/phonebooks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, phone }),
+      });
+
+      const response = await fetching.json();
+
+      if (response.success) {
         this.setState(function (state) {
           return state.users.map((item) => {
             if (item.id === id) {
-              item.id = data.data.id;
+              item.id = response.data.id;
               item.sent = true;
             }
             return item;
           });
         });
-      })
-      .catch((error) => {
-        console.log("error", error);
-      });
+      } 
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
   handleTabClick = (event) => {
