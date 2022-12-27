@@ -87,7 +87,7 @@ export default class UserBox extends Component {
 
       const fetching = await axios.post("http://localhost:3039/api/phonebooks", { name, phone });
 
-      const response = await fetching.data
+      const response = fetching.data
 
       if (response.success) {
         this.setState(function (state) {
@@ -118,7 +118,7 @@ export default class UserBox extends Component {
       const fetching = await axios.put(
         `http://localhost:3039/api/phonebooks/${id}`,{ id, name, phone })
 
-      const response = await fetching.data
+      const response = fetching.data
 
       if (response.success) {
         this.setState(function (state) {
@@ -148,7 +148,7 @@ export default class UserBox extends Component {
         `http://localhost:3039/api/phonebooks/${id}`,
       );
 
-      const response = await fetching.data
+      const response = fetching.data
 
       if (response.success) {
         if (response.data !== 0) {
@@ -168,7 +168,7 @@ export default class UserBox extends Component {
     try {
       const fetching = await axios.post("http://localhost:3039/api/phonebooks", { name, phone })
 
-      const response = await fetching.data
+      const response = fetching.data
 
       if (response.success) {
         this.setState(function (state) {
