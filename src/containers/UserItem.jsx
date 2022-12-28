@@ -1,6 +1,8 @@
 import { Component } from "react";
+import { connect } from "react-redux";
+import { resendContact, updateContact } from "../actions/PhoneBook_action";
 
-export default class UserItem extends Component {
+class UserItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -47,7 +49,6 @@ export default class UserItem extends Component {
       name: this.props.name,
       phone: this.props.phone,
     });
-    
   };
 
   render() {
@@ -142,3 +143,10 @@ export default class UserItem extends Component {
     );
   }
 }
+
+const mapDispatchToProps = (dispatch) => ({
+  resend: ({ id, name, phone }) => dispatch(resendContact({ id, name, phone })),
+  update: ({ id, name, phone }) => dispatch(updateContact({ id, name, phone })),
+});
+
+export default connect(null, mapDispatchToProps)(UserItem);

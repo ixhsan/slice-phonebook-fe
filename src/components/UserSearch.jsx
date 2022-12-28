@@ -1,6 +1,8 @@
 import { Component, Fragment } from "react";
+import { connect } from "react-redux";
+import { searchContact } from "../actions/PhoneBook_action";
 
-export default class UserSearch extends Component {
+class UserSearch extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -167,3 +169,9 @@ export default class UserSearch extends Component {
     );
   }
 }
+
+const mapDispatchToProps = (dispatch) => ({
+  search: (query = {}) => dispatch(searchContact(query)),
+});
+
+export default connect(null, mapDispatchToProps)(UserSearch);

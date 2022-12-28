@@ -1,25 +1,17 @@
-import logo from './logo.svg'; // eslint-disable-next-line
-import './App.css';
+// import logo from './logo.svg'; // eslint-disable-next-line
+// import './App.css';
+import { Provider } from "react-redux";
+import { legacy_createStore as createStore, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
+import UserBox from "./containers/UserBox";
+import rootReducer from "./reducers";
 
-function App() {
+const store = createStore(rootReducer, applyMiddleware(thunk));
+
+export default function App() {
   return (
-    <div className="App"> 
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  )
+    <Provider store={store}>
+      <UserBox />
+    </Provider>
+  );
 }
-
-export default App;
