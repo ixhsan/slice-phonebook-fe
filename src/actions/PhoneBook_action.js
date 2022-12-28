@@ -1,23 +1,4 @@
-import {
-  ADD_CONTACT,
-  ADD_CONTACT_BE_FAILED,
-  ADD_CONTACT_BE_SUCCESS,
-  ADD_CONTACT_FE,
-  DELETE_CONTACT_FAILED,
-  DELETE_CONTACT_SUCCESS,
-  LOAD_CONTACT,
-  LOAD_CONTACT_FAILED,
-  LOAD_CONTACT_REQUEST,
-  LOAD_CONTACT_SUCCESS,
-  LOAD_MORE,
-  LOAD_MORE_FAILED,
-  LOAD_MORE_SUCCESS,
-  RESEND_CONTACT_FAILED,
-  RESEND_CONTACT_SUCCESS,
-  SEARCH_CONTACT_SUCCESS,
-  UPDATE_CONTACT_FAILED,
-  UPDATE_CONTACT_SUCCESS,
-} from "./actionType";
+import { ADD_CONTACT, ADD_CONTACT_BE_FAILED, ADD_CONTACT_BE_SUCCESS, ADD_CONTACT_FE, DELETE_CONTACT_FAILED, DELETE_CONTACT_SUCCESS, LOAD_CONTACT, LOAD_CONTACT_FAILED, LOAD_CONTACT_REQUEST, LOAD_CONTACT_SUCCESS, LOAD_MORE, LOAD_MORE_FAILED, LOAD_MORE_SUCCESS, RESEND_CONTACT_FAILED, RESEND_CONTACT_SUCCESS, SEARCH_CONTACT_RESET_QUERY, SEARCH_CONTACT_SUCCESS, UPDATE_CONTACT_FAILED, UPDATE_CONTACT_SUCCESS } from "./actionType";
 import axios from "axios";
 
 const request = axios.create({
@@ -43,7 +24,7 @@ const loadContactFailed = (error) => ({
 
 export const loadContact = () => async (dispatch, getState) => {
   console.log(`OP:${LOAD_CONTACT} getState`, getState());
-  const state = getState()//.phoneBook;
+  const state = getState(); //.phoneBook;
   try {
     dispatch(loadContactRequest());
     const fetching = await request.get("/api/phonebooks", {
@@ -59,22 +40,23 @@ export const loadContact = () => async (dispatch, getState) => {
 
 const loadMoreSuccess = () => ({
   type: LOAD_MORE_SUCCESS,
-  success: true,
 });
 
-const loadMoreFailed = () => ({
+const loadMoreFailed = (err) => ({
   type: LOAD_MORE_FAILED,
-  success: false,
+  err
 });
 
 export const loadMore = () => async (dispatch, getState) => {
   console.log(`OP:${LOAD_MORE} getState`, getState());
-  const state = getState()//.phoneBook;
-  if (state.params.page < state.params.pages) {
-    await dispatch(loadMoreSuccess());
-    dispatch(loadContact());
-  } else {
-    dispatch(loadMoreFailed());
+  const state = getState(); //.phoneBook;
+  try {
+    if (state.params.page < state.params.pages) {
+      await dispatch(loadMoreSuccess());
+      dispatch(loadContact());
+    }
+  } catch (error) {
+    dispatch(loadMoreFailed(error));
   }
 };
 
@@ -116,9 +98,7 @@ export const addContact = (name, phone) => async (dispatch) => {
     const response = fetching.data;
     console.log("responsenya", response);
     if (response.success) {
-      dispatch(
-        addContactBESuccess({ contact: newContact, data: response.data })
-      );
+      dispatch(addContactBESuccess({ contact: newContact, data: response.data }));
     }
   } catch (error) {
     dispatch(addContactBEFailed(newContact, error));
@@ -142,10 +122,7 @@ export const resendContact =
   ({ id, name, phone }) =>
   async (dispatch) => {
     try {
-      const fetching = await axios.post(
-        "http://localhost:3039/api/phonebooks",
-        { name, phone }
-      );
+      const fetching = await request.post("/api/phonebooks", { name, phone });
 
       const response = fetching.data;
 
@@ -170,9 +147,7 @@ const deleteContactFailed = (error) => ({
 
 export const deleteContact = (id) => async (dispatch) => {
   try {
-    const fetching = await axios.delete(
-      `http://localhost:3039/api/phonebooks/${id}`
-    );
+    const fetching = await request.delete(`/api/phonebooks/${id}`);
 
     const response = fetching.data;
 
@@ -200,14 +175,10 @@ export const updateContact =
   ({ id, name, phone }) =>
   async (dispatch) => {
     try {
-      const fetching = await axios.put(
-        `http://localhost:3039/api/phonebooks/${id}`,
-        {
-          id,
-          name,
-          phone,
-        }
-      );
+      const fetching = await request.put(`/api/phonebooks/${id}`, {
+        name,
+        phone,
+      });
 
       const response = fetching.data;
 
@@ -232,3 +203,12 @@ export const searchContact =
     await dispatch(searchContactSuccess(query));
     dispatch(loadContact());
   };
+
+const searchResetQuery = () => ({
+  type: SEARCH_CONTACT_RESET_QUERY,
+})
+
+export const searchReset = () => async dispatch => {
+  await dispatch(searchResetQuery())
+  dispatch(loadContact())
+}

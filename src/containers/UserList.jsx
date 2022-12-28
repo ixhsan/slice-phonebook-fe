@@ -1,10 +1,6 @@
 import UserItem from "./UserItem";
 import { connect } from "react-redux";
-import {
-  deleteContact,
-  loadContact,
-  loadMore,
-} from "../actions/PhoneBook_action";
+import { deleteContact, loadContact, loadMore } from "../actions/PhoneBook_action";
 import { Component } from "react";
 
 class UserList extends Component {
@@ -13,10 +9,7 @@ class UserList extends Component {
   }
 
   handleScrolling = (event) => {
-    if (
-      event.target.scrollHeight - event.target.scrollTop ===
-      event.target.clientHeight
-    ) {
+    if (event.target.scrollHeight - event.target.scrollTop === event.target.clientHeight) {
       this.props.loadMore();
       console.log("scroll triggered");
     }
@@ -24,13 +17,9 @@ class UserList extends Component {
 
   render() {
     return (
-      <div
-        className="table-responsive"
-        style={{ overflowY: "scroll", height: 300 }}
-        onScroll={this.handleScrolling}
-      >
+      <div className="table-responsive" style={{ overflowY: "scroll", height: 300 }} onScroll={this.handleScrolling}>
         <table className="table table-striped">
-          <caption>List of contact</caption>
+          <caption>There {this.props.params.result > 1 ? `are ${this.props.params.result} contacts` : `is only ${this.props.params.result} contact`}{this.props.params.name || this.props.params.phone ? ` found.` : '.'}</caption>
           <thead className="thead-dark">
             <tr>
               <th scope="col" className=" bg-white sticky-top">

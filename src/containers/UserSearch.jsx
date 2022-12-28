@@ -1,6 +1,6 @@
 import { Component, Fragment } from "react";
 import { connect } from "react-redux";
-import { searchContact } from "../actions/PhoneBook_action";
+import { searchContact, searchReset } from "../actions/PhoneBook_action";
 
 class UserSearch extends Component {
   constructor(props) {
@@ -27,10 +27,7 @@ class UserSearch extends Component {
       isSearch: false,
       mode: "and",
     });
-    this.props.search({
-      name: "",
-      phone: "",
-    });
+    this.props.reset()
   };
 
   handleModeChanges = (event) => {
@@ -64,39 +61,19 @@ class UserSearch extends Component {
           <div className="row my-1">
             <div className="row my-1">
               <div className="col-sm-6">
-                <label
-                  htmlFor="name-search"
-                  className="col-sm-4 col-form-label"
-                >
+                <label htmlFor="name-search" className="col-sm-4 col-form-label">
                   Name
                 </label>
                 <div className="col-sm-12">
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="name-search"
-                    name="name"
-                    onChange={this.handleInputChange}
-                    value={this.state.name}
-                  />
+                  <input type="text" className="form-control" id="name-search" name="name" onChange={this.handleInputChange} value={this.state.name} />
                 </div>
               </div>
               <div className="col-sm-6">
-                <label
-                  htmlFor="phone-search"
-                  className="col-sm-4 col-form-label"
-                >
+                <label htmlFor="phone-search" className="col-sm-4 col-form-label">
                   Phone
                 </label>
                 <div className="col-sm-12">
-                  <input
-                    type="tel"
-                    className="form-control"
-                    id="phone-search"
-                    name="phone"
-                    onChange={this.handleInputChange}
-                    value={this.state.phone}
-                  />
+                  <input type="tel" className="form-control" id="phone-search" name="phone" onChange={this.handleInputChange} value={this.state.phone} />
                 </div>
               </div>
             </div>
@@ -104,21 +81,13 @@ class UserSearch extends Component {
               <div className="col-sm-6">
                 <div className="row">
                   <div className="col-sm-4">
-                    <button
-                      type="submit"
-                      form="search-contact-form"
-                      className="btn btn-secondary col-sm-12"
-                    >
+                    <button type="submit" form="search-contact-form" className="btn btn-secondary col-sm-12">
                       Search
                     </button>
                   </div>
                   {this.state.isSearch && (
                     <div className="col-sm-4">
-                      <button
-                        type="button"
-                        className="btn btn-warning col-sm-12"
-                        onClick={this.handleOnReset}
-                      >
+                      <button type="button" className="btn btn-warning col-sm-12" onClick={this.handleOnReset}>
                         Reset
                       </button>
                     </div>
@@ -130,15 +99,7 @@ class UserSearch extends Component {
                 <fieldset className="row">
                   <div className="col-sm-4">
                     <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="mode"
-                        id="strict"
-                        value="and"
-                        checked={this.state.mode === "and"}
-                        onChange={this.handleModeChanges}
-                      />
+                      <input className="form-check-input" type="radio" name="mode" id="strict" value="and" checked={this.state.mode === "and"} onChange={this.handleModeChanges} />
                       <label className="form-check-label" htmlFor="strict">
                         Specific
                       </label>
@@ -146,15 +107,7 @@ class UserSearch extends Component {
                   </div>
                   <div className="col-sm-2">
                     <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="mode"
-                        id="loose"
-                        value="or"
-                        checked={this.state.mode === "or"}
-                        onChange={this.handleModeChanges}
-                      />
+                      <input className="form-check-input" type="radio" name="mode" id="loose" value="or" checked={this.state.mode === "or"} onChange={this.handleModeChanges} />
                       <label className="form-check-label" htmlFor="loose">
                         Any
                       </label>
@@ -172,6 +125,7 @@ class UserSearch extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
   search: (query = {}) => dispatch(searchContact(query)),
+  reset: () => dispatch(searchReset())
 });
 
 export default connect(null, mapDispatchToProps)(UserSearch);

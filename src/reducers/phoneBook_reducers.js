@@ -1,25 +1,11 @@
-import {
-  ADD_CONTACT_BE_FAILED,
-  ADD_CONTACT_BE_SUCCESS,
-  ADD_CONTACT_FE,
-  DELETE_CONTACT_FAILED,
-  DELETE_CONTACT_SUCCESS,
-  LOAD_CONTACT_FAILED,
-  LOAD_CONTACT_REQUEST,
-  LOAD_CONTACT_SUCCESS,
-  LOAD_MORE_SUCCESS,
-  RESEND_CONTACT_FAILED,
-  RESEND_CONTACT_SUCCESS,
-  SEARCH_CONTACT_SUCCESS,
-  UPDATE_CONTACT_FAILED,
-  UPDATE_CONTACT_SUCCESS,
-} from "../actions/actionType";
+import { ADD_CONTACT_BE_FAILED, ADD_CONTACT_BE_SUCCESS, ADD_CONTACT_FE, DELETE_CONTACT_FAILED, DELETE_CONTACT_SUCCESS, LOAD_CONTACT_FAILED, LOAD_CONTACT_REQUEST, LOAD_CONTACT_SUCCESS, LOAD_MORE_FAILED, LOAD_MORE_SUCCESS, RESEND_CONTACT_FAILED, RESEND_CONTACT_SUCCESS, SEARCH_CONTACT_RESET_QUERY, SEARCH_CONTACT_SUCCESS, UPDATE_CONTACT_FAILED, UPDATE_CONTACT_SUCCESS } from "../actions/actionType";
 
 const initialState = {
   contacts: [],
   params: {
     page: 1,
     pages: 1,
+    result: 0,
   },
 };
 
@@ -37,6 +23,10 @@ export default function phoneBookReducers(state = initialState, action) {
         params: {
           page: response.data.page,
           pages: response.data.pages,
+          result: response.data.rowCount,
+          name: response.data.query.name ? response.data.query.name : '',
+          phone: response.data.query.phone ? response.data.query.phone: '',
+          mode: response.data.query.mode,
         },
         contacts: [
           ...(state.params.page === 1 ? [] : state.contacts),
@@ -56,7 +46,7 @@ export default function phoneBookReducers(state = initialState, action) {
         },
       };
     case LOAD_CONTACT_FAILED:
-      console.log(`OP:${LOAD_CONTACT_FAILED}`, {message: action.error});
+      console.log(`OP:${LOAD_CONTACT_FAILED}`, { message: action.error });
       return state;
     /* BREAD FEATURES */
     //. Add contact
@@ -110,6 +100,9 @@ export default function phoneBookReducers(state = initialState, action) {
           return item;
         }),
       };
+    case LOAD_MORE_FAILED:
+      console.log(`OP:${LOAD_MORE_FAILED}`, action.error);
+      return state
     case RESEND_CONTACT_FAILED:
       console.log(`OP:${RESEND_CONTACT_FAILED}`, { message: action.error });
       return state;
@@ -151,9 +144,21 @@ export default function phoneBookReducers(state = initialState, action) {
         params: {
           ...state.params,
           ...action.data,
-          page: 1
-        }
-      }
+          page: 1,
+          pages: 1,
+        },
+      };
+    case SEARCH_CONTACT_RESET_QUERY:
+      console.log(`OP:${SEARCH_CONTACT_RESET_QUERY}`, action);
+      return {
+        ...state,
+        params: {
+          ...state.params,
+          name: "",
+          phone: "",
+          page: 1,
+        },
+      };
     default:
       return state;
   }
