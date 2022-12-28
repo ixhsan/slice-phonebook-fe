@@ -43,7 +43,7 @@ const loadContactFailed = (error) => ({
 
 export const loadContact = () => async (dispatch, getState) => {
   console.log(`OP:${LOAD_CONTACT} getState`, getState());
-  const state = getState().phoneBook;
+  const state = getState()//.phoneBook;
   try {
     dispatch(loadContactRequest());
     const fetching = await request.get("/api/phonebooks", {
@@ -69,7 +69,7 @@ const loadMoreFailed = () => ({
 
 export const loadMore = () => async (dispatch, getState) => {
   console.log(`OP:${LOAD_MORE} getState`, getState());
-  const state = getState().phoneBook;
+  const state = getState()//.phoneBook;
   if (state.params.page < state.params.pages) {
     await dispatch(loadMoreSuccess());
     dispatch(loadContact());

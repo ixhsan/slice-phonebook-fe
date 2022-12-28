@@ -72,8 +72,8 @@ const mapStateToProps = (state, ownProps) => {
   console.log(`UserList - state`, state);
   console.log(`UserList - ownProps`, ownProps);
   return {
-    list: state.phoneBook.contacts,
-    params: state.phoneBook.params,
+    list: state/*.phoneBook*/.contacts,
+    params: state/*.phoneBook*/.params,
   };
 };
 
