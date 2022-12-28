@@ -177,10 +177,10 @@ export const deleteContact = (id) => async (dispatch) => {
     const response = fetching.data;
 
     if (response.success) {
-      dispatch(deleteContactSuccess(id))
+      dispatch(deleteContactSuccess(id));
     }
   } catch (error) {
-    dispatch(deleteContactFailed(error))
+    dispatch(deleteContactFailed(error));
   }
 };
 
@@ -188,7 +188,7 @@ export const deleteContact = (id) => async (dispatch) => {
 const updateContactSuccess = (data, id) => ({
   type: UPDATE_CONTACT_SUCCESS,
   data,
-  id
+  id,
 });
 
 const updateContactFailed = (error) => ({
@@ -196,32 +196,39 @@ const updateContactFailed = (error) => ({
   error,
 });
 
-export const updateContact = ({id, name, phone}) => async (dispatch) => {
-  try {
-    const fetching = await axios.put(
-      `http://localhost:3039/api/phonebooks/${id}`, {
-        id, name, phone
+export const updateContact =
+  ({ id, name, phone }) =>
+  async (dispatch) => {
+    try {
+      const fetching = await axios.put(
+        `http://localhost:3039/api/phonebooks/${id}`,
+        {
+          id,
+          name,
+          phone,
+        }
+      );
+
+      const response = fetching.data;
+
+      if (response.success) {
+        dispatch(updateContactSuccess(response.data, id));
       }
-    );
-
-    const response = fetching.data;
-
-    if (response.success) {
-      dispatch(updateContactSuccess(response.data, id))
+    } catch (error) {
+      dispatch(updateContactFailed(error));
     }
-  } catch (error) {
-    dispatch(updateContactFailed(error))
-  }
-};
+  };
 
 //. Search Actions
 
 const searchContactSuccess = (query = {}) => ({
   type: SEARCH_CONTACT_SUCCESS,
-  data: query
-})
+  data: query,
+});
 
-export const searchContact = (query = {}) => async dispatch => {
-  await dispatch(searchContactSuccess(query))
-  dispatch(loadContact())
-}
+export const searchContact =
+  (query = {}) =>
+  async (dispatch) => {
+    await dispatch(searchContactSuccess(query));
+    dispatch(loadContact());
+  };

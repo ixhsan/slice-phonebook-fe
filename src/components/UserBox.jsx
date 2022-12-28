@@ -1,6 +1,6 @@
-import UserList from "./UserList";
-import UserForm from "./UserForm";
-import UserSearch from "../components/UserSearch";
+import UserList from "../containers/UserList";
+import UserForm from "../containers/UserForm";
+import UserSearch from "../containers/UserSearch";
 import { Component } from "react";
 
 export default class UserBox extends Component {

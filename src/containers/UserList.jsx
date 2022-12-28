@@ -69,8 +69,8 @@ class UserList extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  console.log(`UserList - OP:mapStateToProps state`, state);
-  console.log(`UserList - OP:mapStateToProps ownProps`, ownProps);
+  console.log(`UserList - state`, state);
+  console.log(`UserList - ownProps`, ownProps);
   return {
     list: state.phoneBook.contacts,
     params: state.phoneBook.params,

@@ -46,9 +46,6 @@ export default function phoneBookReducers(state = initialState, action) {
           }),
         ],
       };
-    case LOAD_CONTACT_FAILED:
-      console.log(`OP:${LOAD_CONTACT_FAILED}`, action);
-      return state;
     case LOAD_MORE_SUCCESS:
       console.log(`OP:${LOAD_MORE_SUCCESS}`, action);
       return {
