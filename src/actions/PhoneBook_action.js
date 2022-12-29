@@ -23,7 +23,7 @@ const loadContactFailed = (error) => ({
 });
 
 export const loadContact = () => async (dispatch, getState) => {
-  console.log(`OP:${LOAD_CONTACT} getState`, getState());
+  // console.log(`OP:${LOAD_CONTACT} getState`, getState());
   const state = getState(); //.phoneBook;
   try {
     dispatch(loadContactRequest());
@@ -31,7 +31,7 @@ export const loadContact = () => async (dispatch, getState) => {
       params: state.params,
     });
     const response = fetching.data;
-    console.log(`OP:${LOAD_CONTACT} response`, response);
+    // console.log(`OP:${LOAD_CONTACT} response`, response);
     dispatch(loadContactSuccess(response));
   } catch (error) {
     dispatch(loadContactFailed(error));

@@ -58,13 +58,13 @@ export default function phoneBookReducers(state = initialState, action) {
       return {
         ...state,
         contacts: [
-          ...state.contacts,
           {
             id: action.data.id,
             name: action.data.name,
             phone: action.data.phone,
             sent: action.data.sent,
           },
+          ...state.contacts,
         ],
       };
     case ADD_CONTACT_BE_SUCCESS:
