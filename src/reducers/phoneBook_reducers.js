@@ -24,8 +24,8 @@ export default function phoneBookReducers(state = initialState, action) {
           page: response.data.page,
           pages: response.data.pages,
           result: response.data.rowCount,
-          name: response.data.query.name ? response.data.query.name : '',
-          phone: response.data.query.phone ? response.data.query.phone: '',
+          name: response.data.query.name ? response.data.query.name : "",
+          phone: response.data.query.phone ? response.data.query.phone : "",
           mode: response.data.query.mode,
         },
         contacts: [
@@ -45,6 +45,9 @@ export default function phoneBookReducers(state = initialState, action) {
           page: state.params.page + 1,
         },
       };
+    case LOAD_MORE_FAILED:
+      console.log(`OP:${LOAD_MORE_FAILED}`, action.error);
+      return state;
     case LOAD_CONTACT_FAILED:
       console.log(`OP:${LOAD_CONTACT_FAILED}`, { message: action.error });
       return state;
@@ -100,9 +103,6 @@ export default function phoneBookReducers(state = initialState, action) {
           return item;
         }),
       };
-    case LOAD_MORE_FAILED:
-      console.log(`OP:${LOAD_MORE_FAILED}`, action.error);
-      return state
     case RESEND_CONTACT_FAILED:
       console.log(`OP:${RESEND_CONTACT_FAILED}`, { message: action.error });
       return state;

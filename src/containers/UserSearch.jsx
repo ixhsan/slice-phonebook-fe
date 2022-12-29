@@ -1,131 +1,134 @@
-import { Component, Fragment } from "react";
-import { connect } from "react-redux";
+import { Fragment, useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { searchContact, searchReset } from "../actions/PhoneBook_action";
 
-class UserSearch extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: "",
-      phone: "",
-      isSearch: false,
-      mode: "and",
-    };
-  }
+export default function UserSearch(props) {
 
-  handleInputChange = (event) => {
+  const dispatch = useDispatch()
+  const [query, setQuery] = useState({
+    name: "",
+    phone: "",
+  });
+
+  const [search, setSearch] = useState({
+    isSearch: false,
+  });
+
+  const [mode, setMode] = useState({
+    mode: "and",
+  });
+
+  const handleInputChange = (event) => {
     const { name, value } = event.target;
-    this.setState({
+    setQuery({
+      ...query,
       [name]: value,
     });
   };
 
-  handleOnReset = () => {
-    this.setState({
+  const handleOnReset = () => {
+    setQuery({
       name: "",
       phone: "",
-      isSearch: false,
+    });
+    setMode({
       mode: "and",
     });
-    this.props.reset()
+    setSearch({
+      isSearch: false,
+    });
+    dispatch(searchReset())
   };
 
-  handleModeChanges = (event) => {
-    this.setState({
+  const handleModeChanges = (event) => {
+    setMode({
+      ...mode,
       mode: event.target.value,
     });
   };
 
-  handleOnSearchSubmit = (event) => {
+  const handleOnSearchSubmit = useCallback((event) => {
     event.preventDefault();
-    if (this.state.name === "" && this.state.phone === "") {
+    if (query.name === "" && query.phone === "") {
       return event.preventDefault();
     }
-    this.props.search({
-      name: this.state.name,
-      phone: this.state.phone,
-      mode: this.state.mode,
-    });
-    this.setState({
+    dispatch(searchContact({
+      name: query.name,
+      phone: query.phone,
+      mode: mode.mode,
+    }))
+    console.log(mode.mode);
+    setSearch({
       isSearch: true,
     });
-  };
+  },[dispatch, query, mode ])
 
-  render() {
-    return (
-      <Fragment>
-        <div className="row">
-          <h2>Search contact</h2>
-        </div>
-        <form id="search-contact-form" onSubmit={this.handleOnSearchSubmit}>
+  return (
+    <Fragment>
+      <div className="row">
+        <h2>Search contact</h2>
+      </div>
+      <form id="search-contact-form" onSubmit={handleOnSearchSubmit}>
+        <div className="row my-1">
           <div className="row my-1">
-            <div className="row my-1">
-              <div className="col-sm-6">
-                <label htmlFor="name-search" className="col-sm-4 col-form-label">
-                  Name
-                </label>
-                <div className="col-sm-12">
-                  <input type="text" className="form-control" id="name-search" name="name" onChange={this.handleInputChange} value={this.state.name} />
-                </div>
-              </div>
-              <div className="col-sm-6">
-                <label htmlFor="phone-search" className="col-sm-4 col-form-label">
-                  Phone
-                </label>
-                <div className="col-sm-12">
-                  <input type="tel" className="form-control" id="phone-search" name="phone" onChange={this.handleInputChange} value={this.state.phone} />
-                </div>
+            <div className="col-sm-6">
+              <label htmlFor="name-search" className="col-sm-4 col-form-label">
+                Name
+              </label>
+              <div className="col-sm-12">
+                <input type="text" className="form-control" id="name-search" name="name" onChange={handleInputChange} value={query.name} />
               </div>
             </div>
-            <div className="row my-1">
-              <div className="col-sm-6">
-                <div className="row">
-                  <div className="col-sm-4">
-                    <button type="submit" form="search-contact-form" className="btn btn-secondary col-sm-12">
-                      Search
-                    </button>
-                  </div>
-                  {this.state.isSearch && (
-                    <div className="col-sm-4">
-                      <button type="button" className="btn btn-warning col-sm-12" onClick={this.handleOnReset}>
-                        Reset
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="col-sm-6">
-                <div className="col-sm-12">search-mode:</div>
-                <fieldset className="row">
-                  <div className="col-sm-4">
-                    <div className="form-check">
-                      <input className="form-check-input" type="radio" name="mode" id="strict" value="and" checked={this.state.mode === "and"} onChange={this.handleModeChanges} />
-                      <label className="form-check-label" htmlFor="strict">
-                        Specific
-                      </label>
-                    </div>
-                  </div>
-                  <div className="col-sm-2">
-                    <div className="form-check">
-                      <input className="form-check-input" type="radio" name="mode" id="loose" value="or" checked={this.state.mode === "or"} onChange={this.handleModeChanges} />
-                      <label className="form-check-label" htmlFor="loose">
-                        Any
-                      </label>
-                    </div>
-                  </div>
-                </fieldset>
+            <div className="col-sm-6">
+              <label htmlFor="phone-search" className="col-sm-4 col-form-label">
+                Phone
+              </label>
+              <div className="col-sm-12">
+                <input type="tel" className="form-control" id="phone-search" name="phone" onChange={handleInputChange} value={query.phone} />
               </div>
             </div>
           </div>
-        </form>
-      </Fragment>
-    );
-  }
+          <div className="row my-1">
+            <div className="col-sm-6">
+              <div className="row">
+                <div className="col-sm-4">
+                  <button type="submit" form="search-contact-form" className="btn btn-secondary col-sm-12">
+                    Search
+                  </button>
+                </div>
+                {search.isSearch && (
+                  <div className="col-sm-4">
+                    <button type="button" className="btn btn-warning col-sm-12" onClick={handleOnReset}>
+                      Reset
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="col-sm-6">
+              <div className="col-sm-12">search-mode:</div>
+              <fieldset className="row">
+                <div className="col-sm-4">
+                  <div className="form-check">
+                    <input className="form-check-input" type="radio" name="mode" id="strict" value="and" checked={mode.mode === "and"} onChange={handleModeChanges} />
+                    <label className="form-check-label" htmlFor="strict">
+                      Specific
+                    </label>
+                  </div>
+                </div>
+                <div className="col-sm-2">
+                  <div className="form-check">
+                    <input className="form-check-input" type="radio" name="mode" id="loose" value="or" checked={mode.mode === "or"} onChange={handleModeChanges} />
+                    <label className="form-check-label" htmlFor="loose">
+                      Any
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+      </form>
+    </Fragment>
+  );
 }
-
-const mapDispatchToProps = (dispatch) => ({
-  search: (query = {}) => dispatch(searchContact(query)),
-  reset: () => dispatch(searchReset())
-});
-
-export default connect(null, mapDispatchToProps)(UserSearch);
