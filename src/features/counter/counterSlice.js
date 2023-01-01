@@ -13,7 +13,10 @@ const initialState = {
 // typically used to make async requests.
 export const incrementAsync = createAsyncThunk(
   'counter/fetchCount',
-  async (amount) => {
+  async (arg, thunkAPI, amount) => {
+    const {dispatch, getState, extra, rejectWithValues} = thunkAPI
+    console.log("🚀 ~ file: counterSlice.js:18 ~ dispatch, getState, extra, rejectWithValues", dispatch, getState, extra, rejectWithValues)
+    console.log("🚀 ~ file: counterSlice.js:17 ~ arg", arg)
     const response = await fetchCount(amount);
     // The value we return becomes the `fulfilled` action payload
     return response.data;
