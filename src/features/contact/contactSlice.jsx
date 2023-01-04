@@ -3,7 +3,6 @@ import { fetchData, addData, deleteData, updateData } from "./contactAPI";
 
 //. Initial State
 
-let payload = {};
 const initialState = {
   contacts: [],
   params: {
@@ -68,7 +67,7 @@ export const deleteContact = createAsyncThunk("contact/deleteContact", async (ar
     if (response.success && response.data > 0) {
       return { ...arg };
     } else {
-      throw "error pas delete";
+      return null
     }
   } catch ({ name, message, code, config, request }) {
     console.log(`${name}: ${message} occured.`);
@@ -114,9 +113,6 @@ export const contactSlice = createSlice({
   reducers: {
     addpage: (state) => {
       state.params.page += 1;
-    },
-    resetpage: (state) => {
-      state.params.page = 1;
     },
     resetquery: (state) => {
       state.params.name = "";
@@ -221,7 +217,7 @@ export const contactSlice = createSlice({
   },
 });
 
-const { addpage, resetpage, resetquery, addtoFE } = contactSlice.actions;
+const { addpage, resetquery, addtoFE } = contactSlice.actions;
 
 //. Thunks
 
@@ -234,7 +230,7 @@ export const loadMore = () => async (dispatch, getState) => {
 }
 
 export const searchContact = (query) => async (dispatch) => {
-  await dispatch(resetpage());
+  await dispatch(resetquery());
   dispatch(loadContact({ query }));
 };
 
